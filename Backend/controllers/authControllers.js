@@ -13,10 +13,10 @@ const generateToken = (userId) => {
 //@access   Public
 const registerUser = async (req, res) => {
   try {
-    const { username, email, password } = req.body;
+    const { name, email, password } = req.body;
 
     // 1.) Check empty
-    if (!username || !email || !password) {
+    if (!name || !email || !password) {
       return res.status(400).json({
         message: "All Field are Required",
       });
@@ -35,7 +35,7 @@ const registerUser = async (req, res) => {
 
     //4.) Create new user
     const user = await User.create({
-      username,
+      name,
       email,
       password: hashedPassword,
     });
@@ -47,7 +47,7 @@ const registerUser = async (req, res) => {
 
       user: {
         _id: user._id,
-        username: user.username,
+        name: user.name,
         email: user.email,
       },
       token: generateToken(user._id),
@@ -96,7 +96,7 @@ const loginUser = async (req, res) => {
 
       user: {
         _id: user._id,
-        username: user.username,
+        name: user.name,
         email: user.email,
       },
       token: generateToken(user._id),
