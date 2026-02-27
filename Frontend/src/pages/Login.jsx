@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import axiosInstance from "../utils/axiosInstance";
+import toast from "react-hot-toast";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -9,6 +11,8 @@ const Login = () => {
     password: "",
   });
 
+  const [loading, setLoading] = useState(false);
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -16,72 +20,91 @@ const Login = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Login Data:", formData);
+
+    try {
+      setLoading(true);
+
+      const { data } = await axiosInstance.post(
+        "/auth/login",
+        formData
+      );
+
+      localStorage.setItem("token", data.token);
+
+      toast.success("User LoggedIn Successfully");
+
+      setTimeout(() => {
+        navigate("/");
+      }, 1500);
+
+    } catch (err) {
+      toast.error(
+        err.response?.data?.message || "Login Failed"
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      
-      {/* Card */}
-      <div className="bg-white shadow-xl rounded-2xl p-8 w-full max-w-md">
-        
-        <h2 className="text-3xl font-bold text-center mb-2 text-gray-800">
-          Welcome Back
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-400 via-blue-500 to-purple-500 px-4">
+
+      {/* Glass Card */}
+      <div className="w-full max-w-md p-8 rounded-2xl backdrop-blur-lg bg-white/10 border border-white/20 shadow-2xl">
+
+        <h2 className="text-3xl font-bold text-center text-white mb-2">
+          Welcome Back 
         </h2>
-        <p className="text-center text-sm text-gray-500 mb-6">
-          Login to your account
+        <p className="text-center text-white/80 text-sm mb-6">
+          Login to continue
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-5">
 
           {/* Email */}
-          <div>
-            <label className="block text-sm mb-1 text-gray-700">
-              Email Address
-            </label>
-            <input
-              type="email"
-              name="email"
-              placeholder="Enter your email"
-              value={formData.email}
-              onChange={handleChange}
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              required
-            />
-          </div>
+          <input
+            type="email"
+            name="email"
+            placeholder="Email Address"
+            value={formData.email}
+            onChange={handleChange}
+            required
+            className="w-full px-4 py-3 rounded-lg bg-white/20 text-white placeholder-white/70 border border-white/30 focus:outline-none focus:ring-2 focus:ring-white focus:bg-white/30 transition"
+          />
 
           {/* Password */}
-          <div>
-            <label className="block text-sm mb-1 text-gray-700">
-              Password
-            </label>
-            <input
-              type="password"
-              name="password"
-              placeholder="Enter password"
-              value={formData.password}
-              onChange={handleChange}
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              required
-            />
-          </div>
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            value={formData.password}
+            onChange={handleChange}
+            required
+            className="w-full px-4 py-3 rounded-lg bg-white/20 text-white placeholder-white/70 border border-white/30 focus:outline-none focus:ring-2 focus:ring-white focus:bg-white/30 transition"
+          />
+
           {/* Button */}
           <button
             type="submit"
-            className="w-full bg-green-600 text-white font-semibold py-2 rounded-lg hover:bg-green-700 transition duration-300"
+            disabled={loading}
+            className={`w-full py-3 rounded-lg font-semibold transition duration-300 ${
+              loading
+                ? "bg-white/40 text-white cursor-not-allowed"
+                : "bg-white text-gray-800 hover:bg-gray-200"
+            }`}
           >
-            Login
+            {loading ? "Logging in..." : "Login"}
           </button>
         </form>
 
         {/* Footer */}
-        <p className="text-sm text-center mt-6 text-gray-600">
-          Don’t have an account?{" "}
+        <p className="text-sm text-center mt-6 text-white/80">
+          Don't have an account?{" "}
           <Link
             to="/signup"
-            className="text-green-600 font-semibold hover:underline"
+            className="font-semibold underline hover:text-white"
           >
             Sign Up
           </Link>
